@@ -4,7 +4,6 @@
  */
 import { Stats } from "../system/stats.js";
 import { COF } from "../system/config.js";
-import { Macros } from "../system/macros.js";
 import { CofRoll } from "../controllers/roll.js";
 
 export class CofActor extends Actor {
@@ -820,13 +819,19 @@ export class CofActor extends Actor {
 
     /**
      * @name rollAbilities
-     * @description Lance un dé pour l'habilité demandée
+     * @description Lance un dé pour la stat demandée
      * @returns {Promise}
      */
     rollStat(stat, options = {}) {
         const { bonus = 0, malus = 0 } = options;
 
-        return Macros.rollStatMacro(this, stat, bonus, malus);
+        // Si la stat n'existe pas
+        if (!COF.stats[stat]){
+            ui.notifications.error(game.i18n.localize("COF.notification.MacroUnknownStat"));
+            return;
+        }
+
+        return CofRoll.skillRollDialog(this, game.i18n.localize(COF.stats[stat]), this.data.data.stats[stat].mod, bonus, malus, 20);
     }
 
 }
