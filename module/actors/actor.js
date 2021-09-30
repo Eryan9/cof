@@ -826,7 +826,7 @@ export class CofActor extends Actor {
     rollStat(stat, options = {}) {
         const { bonus = 0, malus = 0 } = options;
 
-        return Macros.rollStatMacro(this, stat, bonus, malus);
+        return Macros.rollStatMacro(this, stat, bonus, malus, null, options.label, options.descr, options.dialog);
     }
 
     /**
@@ -843,7 +843,45 @@ export class CofActor extends Actor {
 
             this.updateEmbeddedDocuments("ActiveEffect", effectsData);
         }
-    }    
+    } 
 
+    getItemByName(itemName){
+        return this.items.find(item=>item.name === itemName);
+    }
+
+    isItemEquipped(item){
+        if (!this.items.some(it=>it._id === item._id)){
+            ui.notifications.warn(game.i18n.format('COF.notification.MacroItemMissing', {item:item.name}));
+            return false;
+        }
+        return (item.data.data.properties?.equipable ?? false) && item.data.data.worn;
+    }
+
+    getLevel(){
+        return this.data.data.level?.value;
+    }
+
+    getStatMod(stat){
+        let statObj;
+        switch(stat){
+			case "for" :
+			case "str" : statObj = this.data.data.stats?.str; break;
+			case "dex" : statObj = this.data.data.stats?.dex; break;
+			case "con" : statObj = this.data.data.stats?.con; break;
+			case "int" : statObj = this.data.data.stats?.int; break;
+			case "sag" :
+			case "wis" : statObj = this.data.data.stats?.wis; break;
+			case "cha" : statObj = this.data.data.stats?.cha; break;
+			case "atc" :
+			case "melee" : statObj = this.data.data.attacks?.melee; break;
+			case "atd" :
+			case "ranged" : statObj = this.data.data.attacks?.ranged; break;
+			case "atm" :
+			case "magic" : statObj = this.data.data.attacks?.magic; break;
+			default :				
+				return null;
+		}
+		return statObj?.mod;
+    }
 }
 

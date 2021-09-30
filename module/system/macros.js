@@ -1,5 +1,7 @@
 import {CofRoll} from "../controllers/roll.js";
 import {CofHealingRoll} from "../controllers/healing-roll.js";
+import { CofSkillRoll } from "../controllers/skill-roll.js";
+import { CofDamageRoll } from "../controllers/dmg-roll.js";
 
 export class Macros {
 
@@ -20,7 +22,7 @@ export class Macros {
         return actor;
     }
 
-    static rollStatMacro = async function (actor, stat, bonus = 0, malus = 0, onEnter = "submit", label, description) {
+    static rollStatMacro = async function (actor, stat, bonus = 0, malus = 0, onEnter = "submit", label, description, dialog=true, dice="1d20", difficulty) {
         // Plusieurs tokens sélectionnés
         if (actor === null) return;
         // Aucun acteur cible
@@ -65,7 +67,12 @@ export class Macros {
             let skillMalus = statObj.skillmalus;
             if (skillMalus) malus += skillMalus;
         }
-        await CofRoll.skillRollDialog(actor, label && label.length > 0 ? label : game.i18n.localize(statObj.label), mod, bonus, malus, 20, statObj.superior, onEnter, description);
+        if (dialog){
+            CofRoll.skillRollDialog(actor, label && label.length > 0 ? label : game.i18n.localize(statObj.label), mod, bonus, malus, 20, statObj.superior, onEnter, description);
+        }
+        else{
+            new CofSkillRoll(label && label.length > 0 ? label : game.i18n.localize(statObj.label), dice, "+" + +mod, bonus, malus, difficulty, "20", description).roll();
+        }
     };
 
     static rollItemMacro = async function (itemId, itemName, itemType, bonus = 0, malus = 0, dmgBonus=0, dmgOnly=false, customLabel, skillDescr, dmgDescr) {
@@ -111,14 +118,14 @@ export class Macros {
         else { return item.sheet.render(true); }
     };
 
-    static rollHealMacro = async function (label, healFormula, isCritical){
+    static rollHealMacro = async function (label, healFormula, isCritical, title, showButtons=true, description){
         const actor = this.getSpeakersActor();
         // Several tokens selected
         if (actor === null) return;
         // No token selected
         if (actor === undefined) return ui.notifications.error(game.i18n.localize("COF.notification.MacroNoTokenSelected"));
 
-        new CofHealingRoll(label, healFormula, isCritical).roll(actor);
+        new CofHealingRoll(label, healFormula, isCritical, title, showButtons, description).roll(actor);
     }
 
     static rollSkillMacro = async function(label, mod, bonus, malus, critRange, isSuperior = false, description){
@@ -134,7 +141,7 @@ export class Macros {
         CofRoll.skillRollDialog(actor, label, mod, bonus, malus, crit, isSuperior, "submit", description);  
     }
 
-    static rollDamageMacro = async function(label, dmgFormula, dmgBonus, isCritical, dmgDescr){
+    static rollDamageMacro = async function(label, dmgFormula, dmgBonus, isCritical, dmgDescr, dialog=true){
         const actor = this.getSpeakersActor();
         
         // Several tokens selected
@@ -142,8 +149,12 @@ export class Macros {
         // Aucun acteur cible
         if (actor === undefined) return ui.notifications.error(game.i18n.localize("COF.notification.MacroNoActorAvailable"));
 
-        CofRoll.rollDamageDialog(actor, label, dmgFormula, dmgBonus, isCritical, "submit", dmgDescr);
-          
+        if (dialog){       
+            CofRoll.rollDamageDialog(actor, label, dmgFormula, dmgBonus, isCritical, "submit", dmgDescr);
+        }
+        else{
+            let formula = dmgBonus ? dmgFormula + dmgBonus : dmgFormula;
+            new CofDamageRoll(label, formula, false, dmgDescr).roll();
+        }          
     }
-
 }

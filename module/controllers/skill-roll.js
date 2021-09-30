@@ -16,7 +16,7 @@ export class CofSkillRoll {
         this._isCritical = false;
         this._isFumble = false;
         this._isSuccess = false;
-        this._description = description;
+        this._description = Array.isArray(description) ? description.join("<br>") : description ;
     }
 
     async roll(actor){
