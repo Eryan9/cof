@@ -188,19 +188,29 @@ export class CofActorSheet extends CofBaseSheet {
 
     _onIncrease(event) {
         event.preventDefault();
-        return Inventory.onModifyQuantity(this.actor, event, 1, false);
+        
+        const li = $(event.currentTarget).closest(".item");
+        const item = this.actor.items.get(li.data("itemId"));
+        return Inventory.onModifyQuantity(this.actor, item, 1, false);
     }
 
     _onDecrease(event) {
         event.preventDefault();
-        return Inventory.onModifyQuantity(this.actor, event, 1, true);
+
+        const li = $(event.currentTarget).closest(".item");
+        const item = this.actor.items.get(li.data("itemId"));        
+        return Inventory.onModifyQuantity(this.actor, item, 1, true);
     }
 
     _onToggleEquip(event) {
         event.preventDefault();
+
+        const li = $(event.currentTarget).closest(".item");
+        const item = this.actor.items.get(li.data("itemId")); 
+
         if (this._canEquipItem(event)){
             AudioHelper.play({ src: "/systems/cof/sounds/sword.mp3", volume: 0.8, autoplay: true, loop: false }, false);
-            return Inventory.onToggleEquip(this.actor, event);
+            return Inventory.onToggleEquip(this.actor, item);
         }
     }
 
@@ -299,8 +309,12 @@ export class CofActorSheet extends CofBaseSheet {
      */
     _onConsume(event) {
         event.preventDefault();
+
+        const li = $(event.currentTarget).closest(".item");
+        const item = this.actor.items.get(li.data("itemId")); 
+
         AudioHelper.play({ src: "/systems/cof/sounds/gulp.mp3", volume: 0.8, autoplay: true, loop: false }, false);
-        return Inventory.onConsume(this.actor, event);
+        return Inventory.onConsume(this.actor, item);
     }
 
     /**

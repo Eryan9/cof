@@ -56,7 +56,7 @@ export class CofItem extends Item {
         }
     }
 
-    applyEffects(actor, event){
+    applyEffects(actor){
         const itemData = this.data;
         // console.log(itemData)
         if(itemData.data.properties.heal){

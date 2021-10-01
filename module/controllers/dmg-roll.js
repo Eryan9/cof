@@ -18,6 +18,7 @@ export class CofDamageRoll {
                 flags : {msgType : "damage"}
             });
         });
+        return r;
     }
 
     _buildDamageRollMessage() {

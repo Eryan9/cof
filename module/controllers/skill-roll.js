@@ -36,6 +36,7 @@ export class CofSkillRoll {
                 speaker: ChatMessage.getSpeaker({actor: actor})
             });
         })
+        return r;
     }
 
     async weaponRoll(actor, dmgFormula, dmgDescr){
@@ -44,12 +45,14 @@ export class CofSkillRoll {
             if(this._isSuccess && game.settings.get("cof", "useComboRolls")){
                 let r = new CofDamageRoll(this._label, dmgFormula, this._isCritical, dmgDescr);
                 await r.roll(actor);
+                return r;
             }
         }
         else {
             if(game.settings.get("cof", "useComboRolls")){
                 let r = new CofDamageRoll(this._label, dmgFormula, this._isCritical, dmgDescr);
                 await r.roll(actor);
+                return r;
             }
         }
     }

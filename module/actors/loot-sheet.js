@@ -83,11 +83,17 @@ export class CofLootSheet extends CofBaseSheet {
     /* -------------------------------------------- */
     _onIncrease(event) {
         event.preventDefault();
-        return Inventory.onModifyQuantity(this.actor, event, 1, false);
+
+        const li = $(event.currentTarget).closest(".item");
+        const item = this.actor.items.get(li.data("itemId"));        
+        return Inventory.onModifyQuantity(this.actor, item, 1, false);
     }
     _onDecrease(event) {
         event.preventDefault();
-        return Inventory.onModifyQuantity(this.actor, event, 1, true);
+
+        const li = $(event.currentTarget).closest(".item");
+        const item = this.actor.items.get(li.data("itemId"));        
+        return Inventory.onModifyQuantity(this.actor, item, 1, true);
     }
 
     /**

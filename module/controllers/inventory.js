@@ -1,13 +1,16 @@
 export class Inventory {
 
     /**
-     * Callbacks on increase/decrease item actions
-     * @param event
-     */
-    static onModifyQuantity(actor, event, increment, isDecrease) {
-        const li = $(event.currentTarget).closest(".item");
-        const item = actor.items.get(li.data("itemId"));
-        const stackable = li.data("itemStackable");
+    * Callbacks on increase/decrease item actions
+    * @param actor
+    * @param item
+    * @param increment
+    * @param isDecrease
+    */
+    static onModifyQuantity(actor, item, increment, isDecrease) {
+        //const li = $(event.currentTarget).closest(".item");
+        //const item = actor.items.get(li.data("itemId"));
+        const stackable = item.data.data.properties.stackable;
         if(stackable){
             let itemData = duplicate(item.data);
             const qty = itemData.data.qty;
@@ -25,12 +28,14 @@ export class Inventory {
 
     /**
      * Callbacks on equip/unequip actions
-     * @param event
+     * @param actor
+     * @param item
+     * @param syncEffect 
      */
-    static onToggleEquip(actor, event) {
-        const li = $(event.currentTarget).closest(".item");
-        const item = actor.items.get(li.data("itemId"));
-        const equipable = li.data("itemEquipable");
+    static onToggleEquip(actor, item, syncEffect=true) {
+        //const li = $(event.currentTarget).closest(".item");
+        //const item = actor.items.get(li.data("itemId"));
+        const equipable = item.data.data.properties.equipable;
         if(equipable){
             let itemData = duplicate(item.data);
             itemData.data.worn = !itemData.data.worn;
@@ -51,23 +56,24 @@ export class Inventory {
                 }
             }
             return item.update(itemData).then((item)=>{
-                if (!event.shiftKey) actor.syncItemActiveEffects(item);
+                if (!syncEffect) actor.syncItemActiveEffects(item);
             });
         }
     }
 
     /**
      * Callbacks on consume actions
-     * @param event
+     * @param actor
+     * @param item 
      */
-    static onConsume(actor, event) {
-        const li = $(event.currentTarget).closest(".item");
-        const item = actor.items.get(li.data("itemId"));
-        const consumable = li.data("itemConsumable");
+    static onConsume(actor, item) {
+        //const li = $(event.currentTarget).closest(".item");
+        //const item = actor.items.get(li.data("itemId"));
+        const consumable = item.data.data.properties.consumable;
         if(consumable){
             let itemData = duplicate(item.data);
             itemData.data.qty = (itemData.data.qty > 0) ? itemData.data.qty - 1 : 0;
-            return item.update(itemData).then(i=> item.applyEffects(actor, event));
+            return item.update(itemData).then(i=> item.applyEffects(actor));
             // return actor.updateOwnedItem(itemData);
         }
     }
