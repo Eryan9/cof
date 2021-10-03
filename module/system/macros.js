@@ -71,7 +71,7 @@ export class Macros {
             CofRoll.skillRollDialog(actor, label && label.length > 0 ? label : game.i18n.localize(statObj.label), mod, bonus, malus, 20, statObj.superior, onEnter, description);
         }
         else{
-            new CofSkillRoll(label && label.length > 0 ? label : game.i18n.localize(statObj.label), dice, "+" + +mod, bonus, malus, difficulty, "20", description).roll();
+            return new CofSkillRoll(label && label.length > 0 ? label : game.i18n.localize(statObj.label), dice, "+" + +mod, bonus, malus, difficulty, "20", description).roll();
         }
     };
 
@@ -107,18 +107,19 @@ export class Macros {
                     let dmg = actor.computeDm(itemDmgBase, itemDmgStat, itemDmgBonus)
 
                     if (dialog){
-                        if (dmgOnly) CofRoll.rollDamageDialog(actor, label, dmg, 0, false, "submit", dmgDescr);
-                        else CofRoll.rollWeaponDialog(actor, label, mod, bonus, malus, critrange, dmg, dmgBonus, "submit", skillDescr, dmgDescr);
-                    }
+                    if (dmgOnly) CofRoll.rollDamageDialog(actor, label, dmg, 0, false, "submit", dmgDescr);
+                    else CofRoll.rollWeaponDialog(actor, label, mod, bonus, malus, critrange, dmg, dmgBonus, "submit", skillDescr, dmgDescr);
+                }
                     else{
-                        if (dmgOnly) new CofDamageRoll(label, dmg, false, dmgDescr).roll(); 
+                        let formula = dmgBonus ? dmg +  "+" + dmgBonus : dmg;
+                        if (dmgOnly) new CofDamageRoll(label, formula, false, dmgDescr).roll(); 
                         else {        
                             let skillRoll = await new CofSkillRoll(label, "1d20", "+" + +mod, bonus, malus, null, critrange, skillDescr).roll();
 
                             let result = skillRoll.dice[0].results[0].result;
                             let critical = ((result >= critrange.split("-")[0]) || result == 20);
                             
-                            new CofDamageRoll(label, dmg, critical, dmgDescr).roll();                            
+                            new CofDamageRoll(label, formula, critical, dmgDescr).roll();                            
                         }
                     }
                 }
@@ -167,7 +168,7 @@ export class Macros {
         }
         else{
             let formula = dmgBonus ? dmgFormula + dmgBonus : dmgFormula;
-            new CofDamageRoll(label, formula, false, dmgDescr).roll();
+            new CofDamageRoll(label, formula, isCritical, dmgDescr).roll();
         }          
     }
 }

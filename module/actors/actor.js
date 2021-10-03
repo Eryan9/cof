@@ -6,6 +6,7 @@ import { Stats } from "../system/stats.js";
 import { COF } from "../system/config.js";
 import { Macros } from "../system/macros.js";
 import { CofRoll } from "../controllers/roll.js";
+import { Inventory } from "../controllers/inventory.js";
 
 export class CofActor extends Actor {
     
@@ -887,7 +888,7 @@ export class CofActor extends Actor {
     toggleEquipItem(item, bypassChecks, syncEffect=true){
         if(this.canEquipItem(item, bypassChecks)){
             AudioHelper.play({ src: "/systems/cof/sounds/sword.mp3", volume: 0.8, autoplay: true, loop: false }, false);
-            return Inventory.onToggleEquip(this.actor, item, syncEffect);
+            return Inventory.toggleEquip(this, item, syncEffect);
         }  
     }
 
@@ -943,7 +944,7 @@ export class CofActor extends Actor {
         let neededHands = item.data.data.properties["2h"] ? 2 : 1;
 
         // Calcul du nombre de mains déjà utilisées
-        let itemsInHands = this.actor.items.filter(item=>item.data.data.worn && item.data.data.slot === "hand");
+        let itemsInHands = this.items.filter(item=>item.data.data.worn && item.data.data.slot === "hand");
         let usedHands = 0;
         itemsInHands.forEach(item=>usedHands += item.data.data.properties["2h"] ? 2 : 1);                
 
@@ -973,7 +974,7 @@ export class CofActor extends Actor {
         if (!itemData.properties.protection) return true;
 
         // Recheche d'une item de type protection déjà équipé dans le slot cible
-        let equipedItem = this.actor.items.find((slotItem)=>{
+        let equipedItem = this.items.find((slotItem)=>{
             let slotItemData = slotItem.data.data;
 
             return slotItemData.properties?.protection && slotItemData.properties.equipable && slotItemData.worn && slotItemData.slot === itemData.slot;
