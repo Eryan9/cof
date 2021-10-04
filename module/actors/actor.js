@@ -862,6 +862,10 @@ export class CofActor extends Actor {
         return this.data.data.level?.value;
     }
 
+    getDV(){
+        return this.data.data.attributes.hd.value;
+    }
+
     getStatMod(stat){
         let statObj;
         switch(stat){
