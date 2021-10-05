@@ -986,6 +986,23 @@ export class CofActor extends Actor {
         
         // Renvoi vrai si le le slot est libre, sinon renvoi faux
         return !equipedItem;    
-    }    
+    }
+
+    getPathRank(pathName){
+        let rank = 0;
+        let path = this.getItemByName(pathName);
+        if (path){
+
+            let capacities = [...path.data.data.capacities];
+            capacities.sort((a,b)=>{
+                if (a.data.rank < b.data.rank) return 1;
+                if (a.data.rank > b.data.rank) return 0;
+                else return -1
+            });
+
+            rank = capacities.find(capa=>capa.data.checked)?.data.rank; 
+        }
+        return rank;
+    }
 }
 
