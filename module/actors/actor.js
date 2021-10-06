@@ -889,6 +889,17 @@ export class CofActor extends Actor {
 		return statObj?.mod;
     }
 
+    /**
+     * @name rollWeapon
+     * @description
+     * @returns {Promise}
+     */
+     rollWeapon(item, options = {}) {
+        const { bonus = 0, malus = 0, dmgBonus = 0, dmgOnly = false } = options;
+
+        return Macros.rollItemMacro(item.id, item.name, item.type, bonus, malus, dmgBonus, dmgOnly);
+     }
+
     toggleEquipItem(item, bypassChecks, syncEffect=true){
         if(this.canEquipItem(item, bypassChecks)){
             AudioHelper.play({ src: "/systems/cof/sounds/sword.mp3", volume: 0.8, autoplay: true, loop: false }, false);
@@ -986,6 +997,23 @@ export class CofActor extends Actor {
         
         // Renvoi vrai si le le slot est libre, sinon renvoi faux
         return !equipedItem;    
+    }
+
+    /**
+     * Consume one item
+     * @param {*} item 
+     * @returns 
+     */
+     consumeItem(item) {
+        const consumable = item.data.data.properties.consumable;
+        const quantity = item.data.data.qty;
+
+        if(consumable && quantity>0){
+            let itemData = duplicate(item.data);
+            itemData.data.qty = (itemData.data.qty > 0) ? itemData.data.qty - 1 : 0;
+            AudioHelper.play({ src: "/systems/cof/sounds/gulp.mp3", volume: 0.8, autoplay: true, loop: false }, false);
+            return item.update(itemData).then(item => item.applyEffects(this));
+        }
     }
 
     getPathRank(pathName){
