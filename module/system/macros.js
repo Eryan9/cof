@@ -107,9 +107,9 @@ export class Macros {
                     let dmg = actor.computeDm(itemDmgBase, itemDmgStat, itemDmgBonus)
 
                     if (dialog){
-                    if (dmgOnly) CofRoll.rollDamageDialog(actor, label, dmg, 0, false, "submit", dmgDescr);
-                    else CofRoll.rollWeaponDialog(actor, label, mod, bonus, malus, critrange, dmg, dmgBonus, "submit", skillDescr, dmgDescr);
-                }
+                        if (dmgOnly) CofRoll.rollDamageDialog(actor, label, dmg, 0, false, "submit", dmgDescr);
+                        else CofRoll.rollWeaponDialog(actor, label, mod, bonus, malus, critrange, dmg, dmgBonus, "submit", skillDescr, dmgDescr);
+                    }
                     else{
                         let formula = dmgBonus ? dmg +  "+" + dmgBonus : dmg;
                         if (dmgOnly) new CofDamageRoll(label, formula, false, dmgDescr).roll(); 
