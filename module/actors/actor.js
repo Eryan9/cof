@@ -143,28 +143,6 @@ export class CofActor extends Actor {
                 attack.mod = attack.base + attack.bonus;
             }
         }
-
-        // MODIFY TOKEN REGARDING SIZE
-        switch (actorData.data.details.size) {
-            case "big":
-                actorData.token.width = 2;
-                actorData.token.height = 2;
-                break;
-            case "huge":
-                actorData.token.width = 4;
-                actorData.token.height = 4;
-                break;
-            case "colossal":
-                actorData.token.width = 8;
-                actorData.token.height = 8;
-                break;
-            case "tiny":
-            case "small":
-            case "short":
-            case "med":
-            default:
-                break;
-        }
     }
 
     /* -------------------------------------------- */

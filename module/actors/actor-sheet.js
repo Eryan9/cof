@@ -28,11 +28,47 @@ export class CofActorSheet extends CofBaseSheet {
         });
     }
 
+    async updateTokenSize(width, height, scale){
+        if (this.actor.isToken){
+            // Mise à jour du token non liés
+            this.actor.token.update({
+                width: width,
+                height: height,
+                scale: scale
+            })
+        }
+        else {
+            // Mise à jour du prototype token
+            this.actor.update({
+                token:{
+                    width: width,
+                    height: height,
+                    scale: scale                            
+                }
+            });
+        }
+    }
+
     /** @override */
     activateListeners(html) {
         super.activateListeners(html);
         // Everything below here is only needed if the sheet is editable
         if (!this.options.editable) return;
+
+        // Changement de la taille d'une rencontre
+        html.find('.encounterSize').change(ev=>{
+            ev.preventDefault();
+
+            const select = $(ev.currentTarget);
+            let size = select.val();
+            let encounterSize = COF.encounterSize[size];
+
+            // on test si la config existe, sinon on fait rien
+            // (notamment pour la valeur --, on laisse la main au MJ)
+            if (encounterSize) {
+                this.updateTokenSize(encounterSize.width, encounterSize.height, encounterSize.scale);
+            }
+        });
 
         // Click right to open the compendium
         html.find('.cof-compendium-pack').contextmenu(ev => {

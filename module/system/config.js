@@ -140,4 +140,49 @@ COF.actorsAllowedItems = {
     ]
 }
 
+COF.encounterSize = {
+    tiny:{
+        abbrev: "COF.encounterSize.tiny",
+        height: 1,
+        width: 1,
+        scale: 0.25
+    },
+    small:{
+        abbrev: "COF.encounterSize.small",
+        height: 1,
+        width: 1,
+        scale: 0.5
+    },
+    short:{
+        abbrev: "COF.encounterSize.short",
+        height: 1,
+        width: 1,
+        scale: 0.8
+    },
+    med:{
+        abbrev: "COF.encounterSize.med",
+        height: 1,
+        width: 1,
+        scale: 1
+    },
+    big:{
+        abbrev: "COF.encounterSize.big",
+        height: 2,
+        width: 2,
+        scale: 1
+    },
+    huge:{
+        abbrev: "COF.encounterSize.huge",
+        height: 4,
+        width: 4,
+        scale: 1
+    },
+    colossal:{
+        abbrev: "COF.encounterSize.colossal",
+        height: 8,
+        width: 8,
+        scale: 1
+    }                      
+}
+
 COF.debug = false;

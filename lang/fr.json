@@ -371,6 +371,13 @@
 
   "COF.oveloaded.label": "ENCOMBREMENT",
   "COF.overloaded.armor": "Armure",
-  "COF.overloaded.enchantments": "Autre"
+  "COF.overloaded.enchantments": "Autre",
 
+  "COF.encounterSize.tiny" : "Minuscule",
+  "COF.encounterSize.small" : "Très petite",
+  "COF.encounterSize.short" : "Petite",
+  "COF.encounterSize.med" : "Moyenne",
+  "COF.encounterSize.big" : "Grande",
+  "COF.encounterSize.huge" : "Énorme",
+  "COF.encounterSize.colossal" : "Colossale"
 }
