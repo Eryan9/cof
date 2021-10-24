@@ -357,7 +357,7 @@
   "COF.notification.WeaponIndexMissing" : "This encounter does not posses a weapon number",
   "COF.notification.NotEnoughFreeHands" : "Not enough free hands to equip this object",
   "COF.notification.ArmorSlotNotAvailable" : "This armor slot is not available",
-  "COF.notification.ItemNotEquipable" : "{itemName} is not an equipable object",  
+  "COF.notification.ItemNotEquipable" : "{itemName} is not an equipable object",    
 
   "COF.dialog.deletePath.title": "Delete the path ?",
   "COF.dialog.deleteProfile.title": "Delete the profile ?",

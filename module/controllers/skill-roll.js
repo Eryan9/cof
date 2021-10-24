@@ -39,6 +39,15 @@ export class CofSkillRoll {
         return r;
     }
 
+    /**
+     * @name weaponRoll
+     * @description Jet de dommages d'une arme
+     * 
+     * @param {*} actor 
+     * @param {*} dmgFormula 
+     * @param {*} dmgDescr 
+     * @returns 
+     */
     async weaponRoll(actor, dmgFormula, dmgDescr){
         await this.roll(actor);
         if (this._difficulty) {

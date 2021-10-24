@@ -6,7 +6,6 @@ import { Stats } from "../system/stats.js";
 import { COF } from "../system/config.js";
 import { Macros } from "../system/macros.js";
 import { CofRoll } from "../controllers/roll.js";
-import { Inventory } from "../controllers/inventory.js";
 
 export class CofActor extends Actor {
     
@@ -820,14 +819,14 @@ export class CofActor extends Actor {
     }
 
     /**
-     * @name rollAbilities
+     * @name rollStat
      * @description Lance un dé pour l'habilité demandée
      * @returns {Promise}
      */
     rollStat(stat, options = {}) {
         const { bonus = 0, malus = 0 } = options;
 
-        return Macros.rollStatMacro(this, stat, bonus, malus, null, options.label, options.descr, options.dialog);
+        return Macros.rollStatMacro(this, stat, bonus, malus, null, options.label, options.descr, options.dialog, options.dice, options.difficulty);
     }
 
     /**
@@ -846,49 +845,6 @@ export class CofActor extends Actor {
         }
     } 
 
-    getItemByName(itemName){
-        return this.items.find(item=>item.name === itemName);
-    }
-
-    isItemEquipped(item){
-        if (!this.items.some(it=>it._id === item._id)){
-            ui.notifications.warn(game.i18n.format('COF.notification.MacroItemMissing', {item:item.name}));
-            return false;
-        }
-        return (item.data.data.properties?.equipable ?? false) && item.data.data.worn;
-    }
-
-    getLevel(){
-        return this.data.data.level?.value;
-    }
-
-    getDV(){
-        return this.data.data.attributes.hd.value;
-    }
-
-    getStatMod(stat){
-        let statObj;
-        switch(stat){
-			case "for" :
-			case "str" : statObj = this.data.data.stats?.str; break;
-			case "dex" : statObj = this.data.data.stats?.dex; break;
-			case "con" : statObj = this.data.data.stats?.con; break;
-			case "int" : statObj = this.data.data.stats?.int; break;
-			case "sag" :
-			case "wis" : statObj = this.data.data.stats?.wis; break;
-			case "cha" : statObj = this.data.data.stats?.cha; break;
-			case "atc" :
-			case "melee" : statObj = this.data.data.attacks?.melee; break;
-			case "atd" :
-			case "ranged" : statObj = this.data.data.attacks?.ranged; break;
-			case "atm" :
-			case "magic" : statObj = this.data.data.attacks?.magic; break;
-			default :				
-				return null;
-		}
-		return statObj?.mod;
-    }
-
     /**
      * @name rollWeapon
      * @description
@@ -899,21 +855,50 @@ export class CofActor extends Actor {
 
         return Macros.rollItemMacro(item.id, item.name, item.type, bonus, malus, dmgBonus, dmgOnly);
      }
+    
+    /**
+     * 
+     * @param {*} item 
+     * @param {*} bypassChecks 
+     * @returns 
+     */
+     toggleEquipItem(item, bypassChecks) {
+        if (!this.canEquipItem(item, bypassChecks)) return;        
 
-    toggleEquipItem(item, bypassChecks, syncEffect=true){
-        if(this.canEquipItem(item, bypassChecks)){
-            AudioHelper.play({ src: "/systems/cof/sounds/sword.mp3", volume: 0.8, autoplay: true, loop: false }, false);
-            return Inventory.toggleEquip(this, item, syncEffect);
-        }  
+        const equipable = item.data.data.properties.equipable;
+        if(equipable){
+            let itemData = duplicate(item.data);
+            itemData.data.worn = !itemData.data.worn;
+
+            if (game.settings.get("cof", "useIncompetentPJ") && itemData.data.worn) {
+                // Prend en compte les règles de PJ Incompétent : utilisation d'équipement non maîtrisé par le PJ
+                if (itemData.data.subtype === "armor" || itemData.data.subtype === "shield") {
+                    const armorCategory = item.getMartialCategory();
+                    if (!this.isCompetentWithArmor(armorCategory)) {
+                        ui.notifications?.warn(this.name + " est incompétent dans le port de l'armure " + item.name);
+                    }    
+                }
+                if (itemData.data.subtype === "melee" || itemData.data.subtype === "ranged") {
+                    const weaponCategory = item.getMartialCategory();
+                    if (!this.isCompetentWithWeapon(weaponCategory)) {
+                        ui.notifications?.warn(this.name + " est incompétent dans le port de l'arme " + item.name);
+                    }    
+                }
+            }
+            return item.update(itemData).then((item)=>{
+                AudioHelper.play({ src: "/systems/cof/sounds/sword.mp3", volume: 0.8, autoplay: true, loop: false }, false);
+                if (!bypassChecks) this.syncItemActiveEffects(item);
+            });
+        }
     }
-
+       
     /**
      * Check if an item can be equiped
      * @param item
      * @param bypassChecks      
      */        
-    canEquipItem(item, bypassChecks){
-        if (!this.items.some(it=>it._id === item._id)){
+     canEquipItem(item, bypassChecks) {
+        if (!this.items.some(it=>it.id === item.id)){
             ui.notifications.warn(game.i18n.format('COF.notification.MacroItemMissing', {item:item.name}));
             return false;
         }
@@ -941,7 +926,7 @@ export class CofActor extends Actor {
      * @param bypassChecks     
      * @private
      */    
-    _hasEnoughFreeHands(item, bypassChecks){
+     _hasEnoughFreeHands(item, bypassChecks){
         // Si le contrôle de mains libres n'est pas demandé, on renvoi Vrai
         let checkFreehands = game.settings.get("cof", "checkFreeHandsBeforeEquip");
         if (!checkFreehands || checkFreehands === "none") return true;
@@ -997,14 +982,14 @@ export class CofActor extends Actor {
         
         // Renvoi vrai si le le slot est libre, sinon renvoi faux
         return !equipedItem;    
-    }
+    }   
 
     /**
      * Consume one item
      * @param {*} item 
      * @returns 
      */
-     consumeItem(item) {
+    consumeItem(item) {
         const consumable = item.data.data.properties.consumable;
         const quantity = item.data.data.qty;
 
@@ -1014,6 +999,62 @@ export class CofActor extends Actor {
             AudioHelper.play({ src: "/systems/cof/sounds/gulp.mp3", volume: 0.8, autoplay: true, loop: false }, false);
             return item.update(itemData).then(item => item.applyEffects(this));
         }
+    }
+
+    /**
+     * Get Actor level 
+     * @returns 
+     */
+    getLevel(){
+        return this.data.data.level?.value;
+    }
+
+    /**
+     * Get Actor HD
+     * @returns 
+     */
+    getDV(){
+        return this.data.data.attributes.hd.value;
+    }
+
+    /**
+     * Get Actor Stat Modificator
+     * @param stat
+     * @returns 
+     */
+    getStatMod(stat){
+        let statObj;
+        switch(stat){
+			case "for" :
+			case "str" : statObj = this.data.data.stats?.str; break;
+			case "dex" : statObj = this.data.data.stats?.dex; break;
+			case "con" : statObj = this.data.data.stats?.con; break;
+			case "int" : statObj = this.data.data.stats?.int; break;
+			case "sag" :
+			case "wis" : statObj = this.data.data.stats?.wis; break;
+			case "cha" : statObj = this.data.data.stats?.cha; break;
+			case "atc" :
+			case "melee" : statObj = this.data.data.attacks?.melee; break;
+			case "atd" :
+			case "ranged" : statObj = this.data.data.attacks?.ranged; break;
+			case "atm" :
+			case "magic" : statObj = this.data.data.attacks?.magic; break;
+			default :				
+				return null;
+		}
+		return statObj?.mod;
+    }
+
+    getItemByName(itemName){
+        return this.items.find(item=>item.name === itemName);
+    }
+
+    isItemEquipped(item){
+        if (!this.items.some(it=>it._id === item._id)){
+            ui.notifications.warn(game.i18n.format('COF.notification.MacroItemMissing', {item:item.name}));
+            return false;
+        }
+        return (item.data.data.properties?.equipable ?? false) && item.data.data.worn;
     }
 
     getPathRank(pathName){
@@ -1033,4 +1074,3 @@ export class CofActor extends Actor {
         return rank;
     }
 }
-

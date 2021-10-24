@@ -4,7 +4,6 @@
  */
 import { COF, System } from "../system/config.js";
 import { CofBaseSheet } from "./base-sheet.js";
-import { Inventory } from "../controllers/inventory.js";
 import { Traversal } from "../utils/traversal.js";
 import { ArrayUtils } from "../utils/array-utils.js";
 
@@ -83,17 +82,16 @@ export class CofLootSheet extends CofBaseSheet {
     /* -------------------------------------------- */
     _onIncrease(event) {
         event.preventDefault();
-
         const li = $(event.currentTarget).closest(".item");
-        const item = this.actor.items.get(li.data("itemId"));        
-        return Inventory.onModifyQuantity(this.actor, item, 1, false);
+        const item = this.actor.items.get(li.data("itemId"));
+        return item.modifyQuantity(1, false);
     }
+
     _onDecrease(event) {
         event.preventDefault();
-
         const li = $(event.currentTarget).closest(".item");
-        const item = this.actor.items.get(li.data("itemId"));        
-        return Inventory.onModifyQuantity(this.actor, item, 1, true);
+        const item = this.actor.items.get(li.data("itemId"));
+        return item.modifyQuantity(1, true);
     }
 
     /**

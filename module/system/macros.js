@@ -1,10 +1,16 @@
-import {CofRoll} from "../controllers/roll.js";
-import {CofHealingRoll} from "../controllers/healing-roll.js";
+import { CofRoll } from "../controllers/roll.js";
+import { CofHealingRoll } from "../controllers/healing-roll.js";
 import { CofSkillRoll } from "../controllers/skill-roll.js";
 import { CofDamageRoll } from "../controllers/dmg-roll.js";
 
 export class Macros {
 
+    /**
+     * @name getSpeakersActor
+     * @description
+     * 
+     * @returns 
+     */
     static getSpeakersActor = function(){
         // Vérifie qu'un seul token est sélectionné
         const tokens = canvas.tokens.controlled;
@@ -22,6 +28,22 @@ export class Macros {
         return actor;
     }
 
+    /**
+     * @anme rollStatMacro
+     * @description
+     * 
+     * @param {*} actor 
+     * @param {*} stat 
+     * @param {*} bonus 
+     * @param {*} malus 
+     * @param {*} onEnter 
+     * @param {*} label 
+     * @param {*} description 
+     * @param {*} dialog 
+     * @param {*} dice 
+     * @param {*} difficulty 
+     * @returns 
+     */
     static rollStatMacro = async function (actor, stat, bonus = 0, malus = 0, onEnter = "submit", label, description, dialog=true, dice="1d20", difficulty) {
         // Plusieurs tokens sélectionnés
         if (actor === null) return;
@@ -75,6 +97,22 @@ export class Macros {
         }
     };
 
+    /**
+     * @name rollItemMacro
+     * @description
+     * 
+     * @param {*} itemId 
+     * @param {*} itemName 
+     * @param {*} itemType 
+     * @param {*} bonus 
+     * @param {*} malus 
+     * @param {*} dmgBonus 
+     * @param {*} dmgOnly 
+     * @param {*} customLabel 
+     * @param {*} skillDescr 
+     * @param {*} dmgDescr 
+     * @returns 
+     */
     static rollItemMacro = async function (itemId, itemName, itemType, bonus = 0, malus = 0, dmgBonus=0, dmgOnly=false, customLabel, skillDescr, dmgDescr, dialog=true) {
         const actor = this.getSpeakersActor();
         // Several tokens selected
@@ -84,32 +122,35 @@ export class Macros {
 
         const item = actor.items.get(itemId);
         if (!item) return ui.notifications.warn(game.i18n.format('COF.notification.MacroItemMissing', {item:itemName}));
+
         const itemData = item.data;
 
         if(itemData.data.properties.weapon || itemData.data.properties.heal){
             if (itemData.data.properties.weapon){
-                if(itemData.data.worn){
-                    const label =  customLabel && customLabel.length > 0 ? customLabel : itemData.name;                
-                    const critrange = itemData.data.critrange;              
+                if (itemData.data.properties.equipable && !itemData.data.worn) {
+                    return ui.notifications.warn(game.i18n.format('COF.notification.MacroItemUnequiped', {item: itemName}));
+                }
+                const label =  customLabel && customLabel.length > 0 ? customLabel : itemData.name;                
+                const critrange = itemData.data.critrange;              
 
-                    // Compute MOD
-                    const itemModStat = itemData.data.skill.split("@")[1];
-                    const itemModBonus = parseInt(itemData.data.skillBonus);
-                    const weaponCategory = item.getMartialCategory();
-                    
-                    let mod = actor.computeWeaponMod(itemModStat, itemModBonus, weaponCategory);
+                // Compute MOD
+                const itemModStat = itemData.data.skill.split("@")[1];
+                const itemModBonus = parseInt(itemData.data.skillBonus);
+                const weaponCategory = item.getMartialCategory();
+                
+                let mod = actor.computeWeaponMod(itemModStat, itemModBonus, weaponCategory);
 
-                    // Compute DM
-                    const itemDmgBase = itemData.data.dmgBase;                        
-                    const itemDmgStat = itemData.data.dmgStat.split("@")[1];
-                    const itemDmgBonus = parseInt(itemData.data.dmgBonus);
+                // Compute DM
+                const itemDmgBase = itemData.data.dmgBase;                        
+                const itemDmgStat = itemData.data.dmgStat.split("@")[1];
+                const itemDmgBonus = parseInt(itemData.data.dmgBonus);
 
-                    let dmg = actor.computeDm(itemDmgBase, itemDmgStat, itemDmgBonus)
+                let dmg = actor.computeDm(itemDmgBase, itemDmgStat, itemDmgBonus)
 
-                    if (dialog){
-                        if (dmgOnly) CofRoll.rollDamageDialog(actor, label, dmg, 0, false, "submit", dmgDescr);
-                        else CofRoll.rollWeaponDialog(actor, label, mod, bonus, malus, critrange, dmg, dmgBonus, "submit", skillDescr, dmgDescr);
-                    }
+                if (dialog){
+                    if (dmgOnly) CofRoll.rollDamageDialog(actor, label, dmg, 0, false, "submit", dmgDescr);
+                    else CofRoll.rollWeaponDialog(actor, label, mod, bonus, malus, critrange, dmg, dmgBonus, "submit", skillDescr, dmgDescr);
+                }
                     else{
                         let formula = dmgBonus ? dmg +  "+" + dmgBonus : dmg;
                         if (dmgOnly) new CofDamageRoll(label, formula, false, dmgDescr).roll(); 
@@ -121,9 +162,7 @@ export class Macros {
                             
                             new CofDamageRoll(label, formula, critical, dmgDescr).roll();                            
                         }
-                    }
-                }
-                else return ui.notifications.warn(game.i18n.format('COF.notification.MacroItemUnequiped', {item: itemName}));
+                    }                   
             }
             if (itemData.data.properties.heal){
                 new CofHealingRoll(itemData.name, itemData.data.effects.heal.formula, false).roll(actor);

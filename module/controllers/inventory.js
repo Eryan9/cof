@@ -7,7 +7,9 @@ export class Inventory {
     * @param increment
     * @param isDecrease
     */
-    static modifyQuantity(actor, item, increment, isDecrease) {
+    static onModifyQuantity(actor, item, increment, isDecrease) {
+        //const li = $(event.currentTarget).closest(".item");
+        //const item = actor.items.get(li.data("itemId"));
         const stackable = item.data.data.properties.stackable;
         if(stackable){
             let itemData = duplicate(item.data);
@@ -30,7 +32,9 @@ export class Inventory {
      * @param item
      * @param syncEffect 
      */
-    static toggleEquip(actor, item, syncEffect=true) {
+    static onToggleEquip(actor, item, syncEffect=true) {
+        //const li = $(event.currentTarget).closest(".item");
+        //const item = actor.items.get(li.data("itemId"));
         const equipable = item.data.data.properties.equipable;
         if(equipable){
             let itemData = duplicate(item.data);
@@ -52,7 +56,7 @@ export class Inventory {
                 }
             }
             return item.update(itemData).then((item)=>{
-                if (syncEffect) actor.syncItemActiveEffects(item);
+                if (!syncEffect) actor.syncItemActiveEffects(item);
             });
         }
     }
@@ -62,7 +66,9 @@ export class Inventory {
      * @param actor
      * @param item 
      */
-    static consume(actor, item) {
+    static onConsume(actor, item) {
+        //const li = $(event.currentTarget).closest(".item");
+        //const item = actor.items.get(li.data("itemId"));
         const consumable = item.data.data.properties.consumable;
         if(consumable){
             let itemData = duplicate(item.data);

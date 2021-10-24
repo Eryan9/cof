@@ -9,10 +9,11 @@ import { Species } from "../controllers/species.js";
 import { CofRoll } from "../controllers/roll.js";
 import { Traversal } from "../utils/traversal.js";
 import { ArrayUtils } from "../utils/array-utils.js";
-import { Inventory } from "../controllers/inventory.js";
 import { System } from "../system/config.js";
 import { CofBaseSheet } from "./base-sheet.js";
 import { COF } from "../system/config.js";
+import { LevelUpSheet } from "./levelUp-sheet.js";
+import { CofHealingRoll } from "../controllers/healing-roll.js";
 
 export class CofActorSheet extends CofBaseSheet {
 
@@ -168,6 +169,19 @@ export class CofActorSheet extends CofBaseSheet {
             else data.weapons.splice(idx, 1);
             this.actor.update({ 'data.weapons': data.weapons });
         });
+
+        html.find('.levelUp').click(ev => {
+            ev.preventDefault;            
+
+            let dv = this.actor.getDV();
+            let modCon = this.actor.getStatMod("con");
+            let healingRoll = new CofHealingRoll("Gain de points de vie", `${dv}+${modCon}`,false, "Montée de niveau", false);            
+
+            healingRoll.roll(this.actor).then((roll)=>{
+                let levelUp = new LevelUpSheet(this.actor, {resizable:true, hpRoll:roll});
+                levelUp.render(true);
+            });
+        });
     }
 
     /* -------------------------------------------- */
@@ -188,30 +202,26 @@ export class CofActorSheet extends CofBaseSheet {
 
     _onIncrease(event) {
         event.preventDefault();
-        
         const li = $(event.currentTarget).closest(".item");
         const item = this.actor.items.get(li.data("itemId"));
-        return Inventory.modifyQuantity(this.actor, item, 1, false);
+        return item.modifyQuantity(1, false);
     }
 
     _onDecrease(event) {
         event.preventDefault();
-
         const li = $(event.currentTarget).closest(".item");
-        const item = this.actor.items.get(li.data("itemId"));        
-        return Inventory.modifyQuantity(this.actor, item, 1, true);
+        const item = this.actor.items.get(li.data("itemId"));
+        return item.modifyQuantity(1, true);
     }
 
     _onToggleEquip(event) {
         event.preventDefault();
-
         const li = $(event.currentTarget).closest(".item");
-        const item = this.actor.items.get(li.data("itemId")); 
+        const item = this.actor.items.get(li.data("itemId"));
 
-        if (this.actor.canEquipItem(item, event.shiftKey)){
-            AudioHelper.play({ src: "/systems/cof/sounds/sword.mp3", volume: 0.8, autoplay: true, loop: false }, false);
-            return Inventory.toggleEquip(this.actor, item);
-        }
+        const bypassChecks = event.shiftKey;
+
+        return this.actor.toggleEquipItem(item, bypassChecks);
     }
 
     /**
@@ -221,12 +231,10 @@ export class CofActorSheet extends CofBaseSheet {
      */
     _onConsume(event) {
         event.preventDefault();
-
         const li = $(event.currentTarget).closest(".item");
-        const item = this.actor.items.get(li.data("itemId")); 
+        const item = this.actor.items.get(li.data("itemId"));
 
-        AudioHelper.play({ src: "/systems/cof/sounds/gulp.mp3", volume: 0.8, autoplay: true, loop: false }, false);
-        return Inventory.consume(this.actor, item);
+        this.actor.consumeItem(item);
     }
 
     /**
@@ -426,7 +434,7 @@ export class CofActorSheet extends CofBaseSheet {
     /** @override */
     getData(options = {}) {
         const data = super.getData(options);
-        if (COF.debug) console.log("COTA | ActorSheet getData", data);
+        if (COF.debug) console.log("COF | ActorSheet getData", data);
         data.config = game.cof.config;
         data.profile = data.items.find(item => item.type === "profile");
         data.species = data.items.find(item => item.type === "species");
