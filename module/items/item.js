@@ -86,4 +86,9 @@ export class CofItem extends Item {
             return this.update(itemData);
         }
     }
+
+    getQuantity(){
+        if(this.data.data.properties.stackable) return this.data.data.qty;
+        else return 1;
+    }
 }
