@@ -48,6 +48,7 @@
         <div class="tab flexrow active" data-group="primary" data-tab="description">
             {{> "systems/cof/templates/items/parts/properties/item-properties.hbs"}}
             {{editor content=data.description target="data.description" button=true owner=owner editable=editable}}
+            {{editor content=data.GMdescription target="data.GMdescription" button=true owner=owner editable=editable}}
         </div>
 
         {{#if (isNotLimited @root)}}

@@ -1392,8 +1392,8 @@ Copied from dnd5e
   line-height: 18px;
 }
 .cof.item .window-content .sheet-body .tab .editor {
-  height: 100%;
-  min-height: 100%;
+  height: 100px;
+  min-height: 100px;
   max-height: 100%;
 }
 .cof.item .window-content .sheet-body .tab .editor .editor-content {
@@ -1402,8 +1402,8 @@ Copied from dnd5e
   max-height: 100%;
 }
 .cof.item .window-content .sheet-body .tab .editor .tox-tinymce {
-  height: 100%;
-  min-height: 100%;
+  height: 100px;
+  min-height: 100px;
   max-height: 100%;
 }
 .cof.item .window-content .sheet-body .tab.details {
